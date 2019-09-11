@@ -277,16 +277,27 @@ input_manager_process_key(struct input_manager *input_manager,
     bool alt  = event->keysym.mod & (KMOD_LALT | KMOD_RALT);
     bool meta = event->keysym.mod & (KMOD_LGUI | KMOD_RGUI);
 
+    // use Cmd on macOS, Ctrl on other platforms
+#ifdef __APPLE__
+    bool cmd = !ctrl && meta;
+#else
+    if (meta) {
+        // no shortcuts involve Meta on platforms other than macOS, and it must
+        // not be forwarded to the device
+        return true;
+    }
+    bool cmd = ctrl; // && !meta, already guaranteed
+#endif
+
     if (alt) {
-        // no shortcut involves Alt or Meta, and they should not be forwarded
-        // to the device
+        // no shortcuts involve Alt, and it must not be forwarded to the device
         return true;
     }
 
     struct controller *controller = input_manager->controller;
 
     // capture all Ctrl events
-    if (ctrl | meta) {
+    if (ctrl || cmd) {
         SDL_Keycode keycode = event->keysym.sym;
         bool down = event->type == SDL_KEYDOWN;
         int action = down ? ACTION_DOWN : ACTION_UP;
@@ -294,63 +305,59 @@ input_manager_process_key(struct input_manager *input_manager,
         bool shift = event->keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT);
         switch (keycode) {
             case SDLK_h:
+                // Ctrl+h on all platform, since Cmd+h is already captured by
+                // the system on macOS to hide the window
                 if (control && ctrl && !meta && !shift && !repeat) {
                     action_home(controller, action);
                 }
                 return true;
             case SDLK_b: // fall-through
             case SDLK_BACKSPACE:
-                if (control && ctrl && !meta && !shift && !repeat) {
+                if (control && cmd && !shift && !repeat) {
                     action_back(controller, action);
                 }
                 return true;
             case SDLK_s:
-                if (control && ctrl && !meta && !shift && !repeat) {
+                if (control && cmd && !shift && !repeat) {
                     action_app_switch(controller, action);
                 }
                 return true;
             case SDLK_m:
+                // Ctrl+m on all platform, since Cmd+m is already captured by
+                // the system on macOS to minimize the window
                 if (control && ctrl && !meta && !shift && !repeat) {
                     action_menu(controller, action);
                 }
                 return true;
             case SDLK_p:
-                if (control && ctrl && !meta && !shift && !repeat) {
+                if (control && cmd && !shift && !repeat) {
                     action_power(controller, action);
                 }
                 return true;
             case SDLK_o:
-                if (control && ctrl && !meta && down) {
+                if (control && cmd && !meta && down) {
                     set_screen_power_mode(controller, !shift ? SCREEN_POWER_MODE_OFF : SCREEN_POWER_MODE_NORMAL);
                 }
                 return true;
             case SDLK_DOWN:
-#ifdef __APPLE__
-                if (control && !ctrl && meta && !shift) {
-#else
-                if (control && ctrl && !meta && !shift) {
-#endif
+                if (control && cmd && !shift) {
                     // forward repeated events
                     action_volume_down(controller, action);
                 }
                 return true;
             case SDLK_UP:
-#ifdef __APPLE__
-                if (control && !ctrl && meta && !shift) {
-#else
-                if (control && ctrl && !meta && !shift) {
-#endif
+                if (control && cmd && !shift) {
                     // forward repeated events
                     action_volume_up(controller, action);
                 }
                 return true;
             case SDLK_c:
-                if (control && ctrl && !meta && !shift && !repeat && down) {
+                if (control && cmd && !shift && !repeat && down) {
                     request_device_clipboard(controller);
                 }
                 return true;
             case SDLK_v:
-                if (control && ctrl && !meta && !repeat && down) {
+                if (control && cmd && !repeat && down) {
                     if (shift) {
                         // store the text in the device clipboard
                         set_device_clipboard(controller);
@@ -361,35 +368,35 @@ input_manager_process_key(struct input_manager *input_manager,
                 }
                 return true;
             case SDLK_f:
-                if (ctrl && !meta && !shift && !repeat && down) {
+                if (!shift && cmd && !repeat && down) {
                     screen_switch_fullscreen(input_manager->screen);
                 }
                 return true;
             case SDLK_q:
-                if (ctrl && !meta && !shift && !repeat
+                if (cmd && !shift && !repeat
                         && event->type == SDL_KEYDOWN) {
                     return false;
                 }
                 return true;
             case SDLK_x:
-                if (ctrl && !meta && !shift && !repeat && down) {
+                if (!shift && cmd && !repeat && down) {
                     screen_resize_to_fit(input_manager->screen);
                 }
                 return true;
             case SDLK_g:
-                if (ctrl && !meta && !shift && !repeat && down) {
+                if (!shift && cmd && !repeat && down) {
                     screen_resize_to_pixel_perfect(input_manager->screen);
                 }
                 return true;
             case SDLK_i:
-                if (ctrl && !meta && !shift && !repeat && down) {
+                if (!shift && cmd && !repeat && down) {
                     struct fps_counter *fps_counter =
                         input_manager->video_buffer->fps_counter;
                     switch_fps_counter_state(fps_counter);
                 }
                 return true;
             case SDLK_n:
-                if (control && ctrl && !meta && !repeat && down) {
+                if (control && cmd && !repeat && down) {
                     if (shift) {
                         collapse_notification_panel(controller);
                     } else {

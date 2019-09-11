@@ -38,7 +38,6 @@ struct server_params {
     uint16_t local_port;
     uint16_t max_size;
     uint32_t bit_rate;
-    bool send_frame_meta;
     bool control;
 
     uint16_t density;
