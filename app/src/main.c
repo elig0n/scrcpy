@@ -536,7 +536,7 @@ main(int argc, char *argv[]) {
         return 0;
     }
 
-    LOGI("scrcpy " SCRCPY_VERSION " <https://github.com/Genymobile/scrcpy>");
+    LOGI("scrcpy " SCRCPY_VERSION "-L0 <https://github.com/Lurker00/scrcpy>");
 
 #ifdef SCRCPY_LAVF_REQUIRES_REGISTER_ALL
     av_register_all();
