@@ -443,8 +443,10 @@ input_manager_process_mouse_motion(struct input_manager *input_manager,
 **********************************************************************/
     if (event->timestamp <= input_manager->finger_timestamp)
         return; // Counter overflow
-    if (event->timestamp - input_manager->finger_timestamp < 50)
+    if (event->timestamp - input_manager->finger_timestamp < 50) {
+//        LOGI("Dropped mouse event");
         return; // Too soon for manual action
+    }
 
     if (!event->state) {
         // do not send motion events when no button is pressed

@@ -83,6 +83,14 @@ sdl_init_and_configure(bool display) {
         LOGW("Could not disable minimize on focus loss");
     }
 
+    // App handles touches and mouse itself
+#if SDL_VERSION_ATLEAST(2, 0, 6)
+    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 10)
+    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+#endif
+
     // Do not disable the screensaver when scrcpy is running
     SDL_EnableScreenSaver();
 
