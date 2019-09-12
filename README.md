@@ -2,6 +2,8 @@ I provide [release builds only for Windows](https://github.com/Lurker00/scrcpy/r
 
 This customized version requires [my build of ADBKeyBoard](https://github.com/Lurker00/ADBKeyBoard) for full functionality (included into prebuilt package).
 
+Next follow the official description.
+
 # scrcpy (v1.10)
 
 This application provides display and control of Android devices connected on
