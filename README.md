@@ -1,4 +1,4 @@
-I provide a [release build for Windows 64-bit](https://github.com/Lurker00/scrcpy/releases/latest) only. Please read [the description](https://github.com/Lurker00/scrcpy/releases/latest) for the changes compared to the orignal version.
+I provide [release builds only for Windows](https://github.com/Lurker00/scrcpy/releases/latest). For Linux, you can take pre-built server and ADBKeyBoard apk-file from a Windows package. Please read [the description](https://github.com/Lurker00/scrcpy/releases/latest) for the changes compared to the orignal version.
 
 This customized version requires [my build of ADBKeyBoard](https://github.com/Lurker00/ADBKeyBoard) for full functionality (included into prebuilt package).
 
