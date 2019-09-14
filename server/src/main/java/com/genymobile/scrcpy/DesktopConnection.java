@@ -15,6 +15,8 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public final class DesktopConnection implements Closeable {
 
@@ -63,9 +65,21 @@ public final class DesktopConnection implements Closeable {
     }
 
     private static LocalSocket listenAndAccept(final String abstractName) throws IOException {
-        LocalServerSocket serverSocket = new LocalServerSocket(abstractName);
+        final LocalServerSocket serverSocket = new LocalServerSocket(abstractName);
+        final Timer timer = new Timer();
         try {
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        Ln.e("Timeout accepting forward connection");
+                        serverSocket.close();
+                    } catch (Exception e) {
+                    }
+                }
+            }, 10000);
             final LocalSocket sock = serverSocket.accept();
+            timer.cancel();
             serverSocket.close();
             return sock;
         } finally {
@@ -74,11 +88,23 @@ public final class DesktopConnection implements Closeable {
     }
 
     private static SocketChannel listenAndAccept(int port) throws IOException {
-        ServerSocketChannel serverSocket = ServerSocketChannel.open();
+        final ServerSocketChannel serverSocket = ServerSocketChannel.open();
         serverSocket.socket().setReuseAddress(true);
+        final Timer timer = new Timer();
         try {
             serverSocket.socket().bind(new InetSocketAddress(port));
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        Ln.e("Timeout accepting direct connection");
+                        serverSocket.close();
+                    } catch (Exception e) {
+                    }
+                }
+            }, 10000);
             final SocketChannel sock = serverSocket.accept();
+            timer.cancel();
             serverSocket.close();
             return sock;
         } finally {
@@ -91,12 +117,14 @@ public final class DesktopConnection implements Closeable {
         if (tunnelForward) {
             // Accept connection and send one byte so the client may read() to detect a connection error
             if (port == 0) {
+                Ln.i("Accepting forward connection");
                 LocalSocket videoSocket = listenAndAccept(SOCKET_NAME);
                 videoSocket.getOutputStream().write(0);
                 LocalSocket controlSocket = listenAndAccept(SOCKET_NAME);
                 connection = new DesktopConnection(videoSocket, controlSocket);
                 Ln.i("Forward connection accepted");
             } else {
+                Ln.i("Accepting direct connection at "+port);
                 SocketChannel videoSocket = listenAndAccept(port);
                 videoSocket.socket().setSendBufferSize(32*1024);
                 videoSocket.socket().setTcpNoDelay(true);
@@ -108,6 +136,7 @@ public final class DesktopConnection implements Closeable {
                 Ln.i("Direct connection accepted");
             }
         } else {
+            Ln.i("Connecting to desktop");
             LocalSocket videoSocket   = connect(SOCKET_NAME);
             LocalSocket controlSocket = connect(SOCKET_NAME);
             connection = new DesktopConnection(videoSocket, controlSocket);
