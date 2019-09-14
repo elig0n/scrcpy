@@ -361,7 +361,9 @@ server_stop(struct server *server) {
         // ignore failure
         disable_tunnel(server);
     }
+#ifndef WINDOWS_NOCONSOLE
     adb_disconnect(server->serial);
+#endif
 }
 
 void
