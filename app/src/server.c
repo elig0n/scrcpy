@@ -115,7 +115,7 @@ disable_tunnel(struct server *server) {
 }
 
 static process_t
-execute_server(struct server *server, const struct server_params *params) {
+execute_server(struct server *server, const struct server_params *params, bool isIP) {
     char max_size_string[6];
     char bit_rate_string[11];
     sprintf(max_size_string, "%"PRIu16, params->max_size);
@@ -127,7 +127,7 @@ execute_server(struct server *server, const struct server_params *params) {
     char tablet_string[7+5+1];
     sprintf(tablet_string, "tablet=%s", params->tablet ? "true" : "false");
     char local_port_string[5+5+1];
-    sprintf(local_port_string, "port=%u", params->local_port);
+    sprintf(local_port_string, "port=%u", isIP ? params->local_port : 0);
     char ime_string[7+5+1];
     sprintf(ime_string, "useIME=%s", params->useIME ? "true" : "false");
 
@@ -271,7 +271,7 @@ server_start(struct server *server, const char *serial,
     }
 
     // server will connect to our server socket
-    server->process = execute_server(server, params);
+    server->process = execute_server(server, params, isIP);
 
     if (server->process == PROCESS_NONE) {
         if (!server->tunnel_forward) {
