@@ -19,11 +19,10 @@ public class ScreenEncoder implements Device.RotationListener {
     private static final int DEFAULT_FRAME_RATE = 60; // fps
     private static final int REDUCED_FRAME_RATE = 30; // fps
 
-    private static final int DEFAULT_I_FRAME_INTERVAL   = 5; // seconds
-    private static final int INCREASED_I_FRAME_INTERVAL = 1; // seconds
+    private static final int DEFAULT_I_FRAME_INTERVAL   =  5; // seconds
+    private static final int INCREASED_I_FRAME_INTERVAL = 10; // seconds
 
     private static final int REPEAT_FRAME_DELAY    = 6; // repeat after 6 frames
-    private static final int REPEAT_FRAME_NO_DELAY = 1; // repeat after 1 frame
 
     private static final int MICROSECONDS_IN_ONE_SECOND = 1_000_000;
     private static final int NO_PTS = -1;
@@ -53,7 +52,7 @@ public class ScreenEncoder implements Device.RotationListener {
         this(sendFrameMeta, bitRate
                 , isTunnelForward ? REDUCED_FRAME_RATE : DEFAULT_FRAME_RATE
                 , isTunnelForward ? INCREASED_I_FRAME_INTERVAL : DEFAULT_I_FRAME_INTERVAL
-                , isTunnelForward ? REPEAT_FRAME_NO_DELAY : REPEAT_FRAME_DELAY);
+                , REPEAT_FRAME_DELAY);
     }
 
     @Override
