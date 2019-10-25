@@ -458,12 +458,10 @@ void
 input_manager_process_mouse_button(struct input_manager *input_manager,
                                    const SDL_MouseButtonEvent *event,
                                    bool control) {
-    // Windows generates mouse events for touch events.
-    // It also generates "right click" for long touch.
-    if (event->timestamp <= input_manager->finger_timestamp)
-        return; // Counter overflow
-    if (event->timestamp - input_manager->finger_timestamp < 50)
-        return; // Too soon for manual action
+    if (event->which == SDL_TOUCH_MOUSEID) {
+        // simulated from touch events, so it's a duplicate
+        return;
+    }
 
     if (event->type == SDL_MOUSEBUTTONDOWN) {
         if (control && event->button == SDL_BUTTON_RIGHT) {
