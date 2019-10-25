@@ -426,22 +426,9 @@ input_manager_process_key(struct input_manager *input_manager,
 void
 input_manager_process_mouse_motion(struct input_manager *input_manager,
                                    const SDL_MouseMotionEvent *event) {
-/**********************************************************************
-    Lurker: Sometimes mouse events are generated from touch events.
-    The solution is to filter out mouse events that come too close
-    to touch events. It works!
-
-    Tested with Ubuntu 18.04.2 LTE/SDL 2.0.8, and the timestamp
-    filter is required even with SDL_TOUCH_MOUSE_EVENTS=0!
-
-    Windows/SDL 2.0.10 it looks like SDL_TOUCH_MOUSE_EVENTS=0 resolves
-    the problem, but it does not hurt to leave the filter here.
-**********************************************************************/
-    if (event->timestamp <= input_manager->finger_timestamp)
-        return; // Counter overflow
-    if (event->timestamp - input_manager->finger_timestamp < 50) {
-//        LOGI("Dropped mouse event");
-        return; // Too soon for manual action
+    if (event->which == SDL_TOUCH_MOUSEID) {
+        // simulated from touch events, so it's a duplicate
+        return;
     }
 
     if (!event->state) {
