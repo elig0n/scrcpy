@@ -41,7 +41,6 @@ static struct input_manager input_manager = {
     .controller   = &controller,
     .video_buffer = &video_buffer,
     .screen       = &screen,
-    .finger_timestamp = 0,
 };
 
 // init SDL and set appropriate hints

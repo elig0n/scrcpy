@@ -502,8 +502,6 @@ input_manager_process_mouse_button(struct input_manager *input_manager,
 void
 input_manager_process_finger(struct input_manager *input_manager,
                                   const SDL_TouchFingerEvent *event) {
-    input_manager->finger_timestamp = event->timestamp;
-
     struct control_msg msg;
     msg.timestamp = event->timestamp - input_manager->controller->reference_timestamp;
     if (finger_from_sdl_to_android(event,
