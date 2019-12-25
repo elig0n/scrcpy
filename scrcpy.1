@@ -1,0 +1,318 @@
+.TH "SCRCPY" "1" "December 2019" "" ""
+.SH "NAME"
+\fBscrcpy\fR - Display and control Android devices
+.SH "DESCRIPTION"
+.P
+This application provides display and control of Android devices connected on USB (or \fBover TCP/IP\fR). It does not require any \fIroot\fR access. It works on \fIGNU/Linux\fR, \fIWindows\fR and \fImacOS\fR.
+.P
+It focuses on:
+.RS 0
+.IP \(bu 4
+\fBlightness\fR (native, displays only the device screen)
+.IP \(bu 4
+\fBperformance\fR (30~60fps)
+.IP \(bu 4
+\fBquality\fR (1920\[mu]1080 or above)
+.IP \(bu 4
+\fBlow latency\fR (\fB35~70ms\fR \fI\(lahttps://github.com/Genymobile/scrcpy/pull/646\(ra\fR)
+.IP \(bu 4
+\fBlow startup time\fR (~1 second to display the first image)
+.IP \(bu 4
+\fBnon-intrusiveness\fR (nothing is left installed on the device)
+.RE 0
+
+.SH "REQUIREMENTS"
+.P
+The Android device requires at least API 21 (Android 5.0).
+.P
+Make sure you \fBenabled adb debugging\fR \fI\(lahttps://developer.android.com/studio/command-line/adb.html#Enabling\(ra\fR on your device(s).
+.P
+On some devices, you also need to enable \fBan additional option\fR \fI\(lahttps://github.com/Genymobile/scrcpy/issues/70#issuecomment-373286323\(ra\fR to control it using keyboard and mouse.
+.SH "RUN"
+.P
+Plug an Android device, and execute:
+.P
+.RS 2
+.nf
+scrcpy
+.fi
+.RE
+.P
+It accepts command-line arguments, listed by:
+.P
+.RS 2
+.nf
+scrcpy --help
+.fi
+.RE
+.SH "FEATURES"
+.SS "Reduce size"
+.P
+Sometimes, it is useful to mirror an Android device at a lower definition to increase performance.
+.P
+To limit both the width and height to some value (e.g. 1024):
+.P
+.RS 2
+.nf
+scrcpy --max-size 1024
+scrcpy -m 1024  # short version
+.fi
+.RE
+.P
+The other dimension is computed to that the device aspect ratio is preserved. That way, a device in 1920\[mu]1080 will be mirrored at 1024\[mu]576.
+.SS "Change bit-rate"
+.P
+The default bit-rate is 8 Mbps. To change the video bitrate (e.g. to 2 Mbps):
+.P
+.RS 2
+.nf
+scrcpy --bit-rate 2M
+scrcpy -b 2M  # short version
+.fi
+.RE
+.SS "Crop"
+.P
+The device screen may be cropped to mirror only part of the screen.
+.P
+This is useful for example to mirror only one eye of the Oculus Go:
+.P
+.RS 2
+.nf
+scrcpy --crop 1224:1440:0:0   # 1224x1440 at offset (0,0)
+scrcpy -c 1224:1440:0:0       # short version
+.fi
+.RE
+.P
+If \fB--max-size\fR is also specified, resizing is applied after cropping.
+.SS "Wireless"
+.P
+\fIScrcpy\fR uses \fBadb\fR to communicate with the device, and \fBadb\fR can \fBconnect\fR \fI\(lahttps://developer.android.com/studio/command-line/adb.html#wireless\(ra\fR to a device over TCP/IP:
+.RS 0
+.IP 1. 4
+Connect the device to the same Wi-Fi as your computer.
+.IP 2. 4
+Get your device IP address (in Settings \[->] About phone \[->] Status).
+.IP 3. 4
+Enable adb over TCP/IP on your device: \fBadb tcpip 5555\fR.
+.IP 4. 4
+Unplug your device.
+.IP 5. 4
+Connect to your device: \fBadb connect DEVICE_IP:5555\fR \fI(replace \fBDEVICE_IP\fI)\fR.
+.IP 6. 4
+Run \fBscrcpy\fR as usual.
+.RE 0
+
+.P
+It may be useful to decrease the bit-rate and the definition:
+.P
+.RS 2
+.nf
+scrcpy --bit-rate 2M --max-size 800
+scrcpy -b2M -m800  # short version
+.fi
+.RE
+.SS "Record screen"
+.P
+It is possible to record the screen while mirroring:
+.P
+.RS 2
+.nf
+scrcpy --record file.mp4
+scrcpy -r file.mkv
+.fi
+.RE
+.P
+To disable mirroring while recording:
+.P
+.RS 2
+.nf
+scrcpy --no-display --record file.mp4
+scrcpy -Nr file.mkv
+# interrupt recording with Ctrl+C
+# Ctrl+C does not terminate properly on Windows, so disconnect the device
+.fi
+.RE
+.P
+"Skipped frames" are recorded, even if they are not displayed in real time (for performance reasons). Frames are \fItimestamped\fR on the device, so \fBpacket delay variation\fR \fI\(lahttps://en.wikipedia.org/wiki/Packet_delay_variation\(ra\fR does not impact the recorded file.
+.SS "Multi-devices"
+.P
+If several devices are listed in \fBadb devices\fR, you must specify the \fIserial\fR:
+.P
+.RS 2
+.nf
+scrcpy --serial 0123456789abcdef
+scrcpy -s 0123456789abcdef  # short version
+.fi
+.RE
+.P
+You can start several instances of \fIscrcpy\fR for several devices.
+.SS "Fullscreen"
+.P
+The app may be started directly in fullscreen:
+.P
+.RS 2
+.nf
+scrcpy --fullscreen
+scrcpy -f  # short version
+.fi
+.RE
+.P
+Fullscreen can then be toggled dynamically with \fBCtrl\fR+\fBf\fR.
+.SS "Always on top"
+.P
+The window of app can always be above others by:
+.P
+.RS 2
+.nf
+scrcpy --always-on-top
+scrcpy -T  # short version
+.fi
+.RE
+.SS "Show touches"
+.P
+For presentations, it may be useful to show physical touches (on the physical device).
+.P
+Android provides this feature in \fIDevelopers options\fR.
+.P
+\fIScrcpy\fR provides an option to enable this feature on start and disable on exit:
+.P
+.RS 2
+.nf
+scrcpy --show-touches
+scrcpy -t
+.fi
+.RE
+.P
+Note that it only shows \fIphysical\fR touches (with the finger on the device).
+.SS "Install APK"
+.P
+To install an APK, drag & drop an APK file (ending with \fB.apk\fR) to the \fIscrcpy\fR window.
+.P
+There is no visual feedback, a log is printed to the console.
+.SS "Push file to device"
+.P
+To push a file to \fB/sdcard/\fR on the device, drag & drop a (non-APK) file to the \fIscrcpy\fR window.
+.P
+There is no visual feedback, a log is printed to the console.
+.P
+The target directory can be changed on start:
+.P
+.RS 2
+.nf
+scrcpy --push-target /sdcard/foo/bar/
+.fi
+.RE
+.SS "Read-only"
+.P
+To disable controls (everything which can interact with the device: input keys, mouse events, drag&drop files):
+.P
+.RS 2
+.nf
+scrcpy --no-control
+scrcpy -n
+.fi
+.RE
+.SS "Turn screen off"
+.P
+It is possible to turn the device screen off while mirroring on start with a command-line option:
+.P
+.RS 2
+.nf
+scrcpy --turn-screen-off
+scrcpy -S
+.fi
+.RE
+.P
+Or by pressing \fBCtrl\fR+\fBo\fR at any time.
+.P
+To turn it back on, press \fBPOWER\fR (or \fBCtrl\fR+\fBp\fR).
+.SS "Render expired frames"
+.P
+By default, to minimize latency, \fIscrcpy\fR always renders the last decoded frame available, and drops any previous one.
+.P
+To force the rendering of all frames (at a cost of a possible increased latency), use:
+.P
+.RS 2
+.nf
+scrcpy --render-expired-frames
+.fi
+.RE
+.SS "Custom window title"
+.P
+By default, the window title is the device model. It can be changed:
+.P
+.RS 2
+.nf
+scrcpy --window-title 'My device'
+.fi
+.RE
+.SS "Forward audio"
+.P
+Audio is not forwarded by \fIscrcpy\fR. Use \fBUSBaudio\fR \fI\(laLinux-only\(ra\fR.
+.P
+Also see \fBissue #14\fR \fI\(lahttps://github.com/Genymobile/scrcpy/issues/14\(ra\fR.
+.SH "SHORTCUTS"
+.TS
+tab(@) allbox;
+cb cb cb
+l l l .
+Action@Shortcut@Shortcut (macOS)
+Switch fullscreen mode@\fBCtrl\fR+\fBf\fR@\fBCmd\fR+\fBf\fR
+Resize window to 1:1 (pixel-perfect)@\fBCtrl\fR+\fBg\fR@\fBCmd\fR+\fBg\fR
+Resize window to remove black borders@\fBCtrl\fR+\fBx\fR | \fIDouble-click\[S1]\fR@\fBCmd\fR+\fBx\fR | \fIDouble-click\[S1]\fR
+Click on \fBHOME\fR@\fBCtrl\fR+\fBh\fR | \fIMiddle-click\fR@\fBCtrl\fR+\fBh\fR | \fIMiddle-click\fR
+Click on \fBBACK\fR@\fBCtrl\fR+\fBb\fR | \fIRight-click\[S2]\fR@\fBCmd\fR+\fBb\fR | \fIRight-click\[S2]\fR
+Click on \fBAPP_SWITCH\fR@\fBCtrl\fR+\fBs\fR@\fBCmd\fR+\fBs\fR
+Click on \fBMENU\fR@\fBCtrl\fR+\fBm\fR@\fBCtrl\fR+\fBm\fR
+Click on \fBVOLUME_UP\fR@\fBCtrl\fR+\fB\[ua]\fR \fI(up)\fR@\fBCmd\fR+\fB\[ua]\fR \fI(up)\fR
+Click on \fBVOLUME_DOWN\fR@\fBCtrl\fR+\fB\[da]\fR \fI(down)\fR@\fBCmd\fR+\fB\[da]\fR \fI(down)\fR
+Click on \fBPOWER\fR@\fBCtrl\fR+\fBp\fR@\fBCmd\fR+\fBp\fR
+Power on@\fIRight-click\[S2]\fR@\fIRight-click\[S2]\fR
+Turn device screen off (keep mirroring)@\fBCtrl\fR+\fBo\fR@\fBCmd\fR+\fBo\fR
+Expand notification panel@\fBCtrl\fR+\fBn\fR@\fBCmd\fR+\fBn\fR
+Collapse notification panel@\fBCtrl\fR+\fBShift\fR+\fBn\fR@\fBCmd\fR+\fBShift\fR+\fBn\fR
+Copy device clipboard to computer@\fBCtrl\fR+\fBc\fR@\fBCmd\fR+\fBc\fR
+Paste computer clipboard to device@\fBCtrl\fR+\fBv\fR@\fBCmd\fR+\fBv\fR
+Copy computer clipboard to device@\fBCtrl\fR+\fBShift\fR+\fBv\fR@\fBCmd\fR+\fBShift\fR+\fBv\fR
+Enable/disable FPS counter (on stdout)@\fBCtrl\fR+\fBi\fR@\fBCmd\fR+\fBi\fR
+.TE
+.P
+\fI\[S1]Double-click on black borders to remove them.\fR
+.br
+\fI\[S2]Right-click turns the screen on if it was off, presses BACK otherwise.\fR
+.SH "CUSTOM PATHS"
+.P
+To use a specific \fIadb\fR binary, configure its path in the environment variable \fBADB\fR:
+.P
+.RS 2
+.nf
+ADB=/path/to/adb scrcpy
+.fi
+.RE
+.P
+To override the path of the \fBscrcpy-server.jar\fR file, configure its path in \fBSCRCPY_SERVER_PATH\fR.
+.SH "WHY \FISCRCPY\FR?"
+.P
+A colleague challenged me to find a name as unpronounceable as \fBgnirehtet\fR \fI\(lahttps://github.com/Genymobile/gnirehtet\(ra\fR.
+.P
+\fB\fBstrcpy\fR\fR \fI\(lahttp://man7.org/linux/man-pages/man3/strcpy.3.html\(ra\fR copies a \fBstr\fRing; \fBscrcpy\fR copies a \fBscr\fReen.
+.SH "LICENCE"
+.P
+.RS 2
+.nf
+Copyright (C) 2018 Genymobile
+Copyright (C) 2018-2019 Romain Vimont
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+.fi
+.RE
